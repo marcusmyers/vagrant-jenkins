@@ -4,6 +4,11 @@ group { "puppet":
 
 File { owner => 0, group => 0, mode => 0644 }
 
+exec { "apt-update":
+  command => "/usr/bin/apt-get update",
+}
+
+Exec["apt-update"] -> Package <| |>
 
 file { '/etc/motd':
   content => "Welcome to your NEW Vagrant-built virtual machine!
@@ -14,8 +19,7 @@ include jenkins
 include git
 class { 'apache':
   notify => [
-    exec['clean_urls_for_drupal'],
-    exec['allow_jenkins_virtual_hosts'],
+    Exec['allow_jenkins_virtual_hosts'],
   ],
 }
 
