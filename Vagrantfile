@@ -5,9 +5,19 @@ Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+  end
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ubuntu/trusty64"
+
+  # Set all boxes to have 2GB of ram
+  # and 2 CPUS
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 2
+  end
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
@@ -23,6 +33,8 @@ Vagrant.configure("2") do |config|
     puppet.manifests_path = "puppet/manifests"
     puppet.manifest_file  = "init.pp"
     puppet.module_path = "puppet/modules"
+    puppet.hiera_config_path = "hiera.yaml"
+    puppet.working_directory = "/tmp/vagrant-puppet"
   end
 
 

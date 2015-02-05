@@ -14,6 +14,9 @@ file { '/etc/motd':
   content => "Welcome to your NEW Vagrant-built virtual machine!
               Managed by Puppet.\n"
 }
+package { 'curl':
+  ensure => installed,
+}
 
 include jenkins
 include git
@@ -27,7 +30,6 @@ file { "/var/lib/jenkins/conf.d":
   ensure => "directory",
 }
 
-
 # /etc/httpd/conf.d/*.conf gets deleted on every provision,
 # so we put our virtual hosts elsewhere, specifically at
 # /var/lib/jenkins/conf.d/*.conf. I could not get the conditional to
@@ -38,14 +40,24 @@ exec { "allow_jenkins_virtual_hosts":
   command => '/bin/grep "Include \"\/var\/lib\/jenkins\/conf\.d\/\*.conf\"" /etc/httpd/conf/httpd.conf || /bin/echo "Include \"/var/lib/jenkins/conf.d/*.conf\"" >> /etc/httpd/conf/httpd.conf; sudo apachectl restart',
 }
 
-php::ini { '/etc/php.ini':
-  display_errors => 'On',
-  memory_limit   => '256M',
+exec { 'downloadJenkinsCLI':
+  command => '/usr/bin/wget http://localhost:8080/jnlpJars/jenkins-cli.jar',
+  creates => '/var/lib/jenkins/jenkins-cli.jar',
+  cwd     => '/var/lib/jenkins', 
 }
-include php::cli
+
+
+#php::ini { '/etc/php.ini':
+#  display_errors => 'On',
+#  memory_limit   => '256M',
+#}
+#include php
 # see https://drupal.org/node/881098 for xml
-php::module { [ 'mbstring', 'apc', 'pdo', 'mysql', 'gd', 'xml' ]: }
-class { 'php::mod_php5': inifile => '/etc/php.ini' }
+#php::module { [ 'mbstring', 'apc', 'pdo', 'mysql', 'gd', 'xml' ]: }
+#class { 'php::mod_php5': inifile => '/etc/php.ini' }
+
+# PHP Install configure
+include ::php
 
 # See https://ask.puppetlabs.com/question/3516
 # Specifying a password here causes permissions problems
@@ -55,7 +67,7 @@ class { '::mysql::server':
 }
 
 # don't use a firewall, see http://stackoverflow.com/questions/5984217
-service { iptables: ensure => stopped }
+service { ufw: ensure => stopped }
 
 # Install git and dependencies, see
 # https://github.com/jenkinsci/puppet-jenkins/issues/78
@@ -70,3 +82,16 @@ jenkins::plugin { 'credentials': }
 jenkins::plugin { 'multiple-scms': }
 jenkins::plugin { 'parameterized-trigger': }
 jenkins::plugin { 'git-client': }
+jenkins::plugin { 'checkstyle': }
+jenkins::plugin { 'cloverphp': }
+jenkins::plugin { 'dry': }
+jenkins::plugin { 'htmlpublisher': }
+jenkins::plugin { 'jdepend': }
+jenkins::plugin { 'pmd': }
+jenkins::plugin { 'violations': }
+jenkins::plugin { 'xunit': }
+
+
+
+
+

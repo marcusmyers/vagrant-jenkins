@@ -1,0 +1,27 @@
+---
+php::ensure: latest
+php::manage_repos: true
+php::fpm: false
+php::dev: false
+php::composer: true
+php::pear: true
+php::phpunit: true
+php::composer::auto_update: true
+php::setings:
+  Date/date.timezone: America/New_York
+php::cli::settings:
+  PHP/memory_limit: 512M
+php::extensions:
+  json: {}
+  mysql: {}
+  xsl: {}
+  mcrypt: {}
+  memcached:
+    provider: pecl
+    header_packages:
+      - libmemcached-dev
+  apc:
+    package_prefix: php-
+    settings:
+      apc.stat: 1
+      apc.stat_ctime: 1
